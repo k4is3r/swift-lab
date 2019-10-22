@@ -2,6 +2,9 @@ import Foundation
 
 class Account {
     var amount: Float = 0{
+        willSet{
+            print("Vamos a cambiar el valor", amount, newValue)
+        }
         didSet{
             print("Tenemos nuevo valor",amount)
         }
@@ -31,6 +34,16 @@ class Person{
     var lastName: String
     var account: Account?
     
+    var fullName: String {
+        get{
+            return "\(name) \(lastName)"
+        }
+        set{
+            name = String(newValue.split(separator: " ").first ?? "")
+            lastName = "\(newValue.split(separator: " ").last ?? "" )"
+        }
+    }
+    
     init(name: String, lastName: String) {
         self.name = name
         self.lastName = lastName
@@ -48,3 +61,8 @@ account.addTransaction(value: 20)
 me.account?.addTransaction(value: 20)
 
 print(me.account!.amount)
+print(me.fullName)
+
+me.fullName = "Imery Edward"
+print(me.fullName)
+print(me.name)
