@@ -1,5 +1,11 @@
 import Foundation
 
+enum DebitCategories{
+    case healt
+    case food, rent, tax
+    case transportation, entretaining
+}
+
 class Transactions {
     var value: Float
     var name: String
@@ -11,7 +17,12 @@ class Transactions {
 }
 
 class Debit: Transactions{
+    var category: DebitCategories
     
+    init(value: Float, name: String, category:DebitCategories) {
+        self.category = category
+        super.init(value: value, name: name)
+    }
 }
 
 class Gain: Transactions{
@@ -91,13 +102,31 @@ me.account = account
 print(me.account!)
 
 me.account?.addTransaction(
-    transaction: Debit(value: 20, name: "Cafe con amigos"))
+    transaction: Debit(value: 20,
+                       name: "Cafe con amigos",
+                       category:DebitCategories.food
+    )
+)
+
 me.account?.addTransaction(
-    transaction: Debit(value: 100, name: "Juego PS4"))
+    transaction: Debit(value: 100,
+                       name: "Juego PS4",
+                       category:.entretaining
+    )
+)
+
 me.account?.addTransaction(
-    transaction: Debit(value: 3400, name: "MacbookPro"))
+    transaction: Debit(value: 3400,
+                       name: "MacbookPro",
+                       category:.entretaining
+    )
+)
+
 me.account?.addTransaction(
-    transaction: Gain(value: 1200, name: "Rembolso compra"))
+    transaction: Gain(value: 1200,
+                      name: "Rembolso compra"
+    )
+)
 
 
 print(me.account!.amount)
