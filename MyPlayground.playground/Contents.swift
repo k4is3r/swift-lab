@@ -1,8 +1,21 @@
 import Foundation
 
-struct Transactions {
+class Transactions {
     var value: Float
     var name: String
+    
+    init(value: Float, name: String) {
+        self.value = value
+        self.name = name
+    }
+}
+
+class Debit: Transactions{
+    
+}
+
+class Gain: Transactions{
+    
 }
 
 class Account {
@@ -24,14 +37,28 @@ class Account {
     
     @discardableResult
     func addTransaction( transaction: Transactions) -> Float {
-        if (amount - transaction.value) < 0{
-            return 0
+        if transaction is Gain{
+            amount += transaction.value
         }
         
-        amount -= transaction.value
+        if transaction is Debit {
+            if (amount - transaction.value) < 0{
+                return 0
+            }
+            amount -= transaction.value
+        }
+
+        
         transactions.append(transaction)
         
         return amount
+    }
+    
+    func debists() -> [Transactions]{
+        return transactions.filter({$0 is Debit})
+    }
+    func gains() -> [Transactions]{
+        return transactions.filter({$0 is Gain})
     }
 }
 
@@ -64,11 +91,13 @@ me.account = account
 print(me.account!)
 
 me.account?.addTransaction(
-    transaction: Transactions(value: 20, name: "Cafe con amigos"))
+    transaction: Debit(value: 20, name: "Cafe con amigos"))
 me.account?.addTransaction(
-    transaction: Transactions(value: 100, name: "Juego PS4"))
+    transaction: Debit(value: 100, name: "Juego PS4"))
 me.account?.addTransaction(
-    transaction: Transactions(value: 3400, name: "MacbookPro"))
+    transaction: Debit(value: 3400, name: "MacbookPro"))
+me.account?.addTransaction(
+    transaction: Gain(value: 1200, name: "Rembolso compra"))
 
 
 print(me.account!.amount)
