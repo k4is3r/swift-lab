@@ -1,7 +1,11 @@
 import Foundation
 
-struct Account {
-    var amount: Float = 0
+class Account {
+    var amount: Float = 0{
+        didSet{
+            print("Tenemos nuevo valor",amount)
+        }
+    }
     var name: String = ""
     var transactions: [Float] = []
     
@@ -11,7 +15,7 @@ struct Account {
     }
     
     @discardableResult
-    mutating func addTransaction(value: Float) -> Float {
+    func addTransaction(value: Float) -> Float {
         if (amount - value) < 0{
             return 0
         }
@@ -22,18 +26,25 @@ struct Account {
     }
 }
 
-struct Person{
+class Person{
     var name: String
     var lastName: String
     var account: Account?
+    
+    init(name: String, lastName: String) {
+        self.name = name
+        self.lastName = lastName
+    }
 }
 
-var me = Person(name: "Eduardo", lastName: "Imery", account: nil)
+var me = Person(name: "Eduardo", lastName: "Imery")
 var account = Account(amount: 100_000, name: "X Bank")
 
 me.account = account
 
 print(me.account!)
 
+account.addTransaction(value: 20)
 me.account?.addTransaction(value: 20)
-print(me.account)
+
+print(me.account!.amount)
