@@ -29,8 +29,11 @@ struct Person{
 }
 
 var me = Person(name: "Eduardo", lastName: "Imery", account: nil)
-let account = Account(amount: 100_000, name: "X Bank")
+var account = Account(amount: 100_000, name: "X Bank")
 
 me.account = account
 
 print(me.account!)
+
+me.account?.addTransaction(value: 20)
+print(me.account)
