@@ -1,5 +1,10 @@
 import Foundation
 
+struct Transactions {
+    var value: Float
+    var name: String
+}
+
 class Account {
     var amount: Float = 0{
         willSet{
@@ -10,7 +15,7 @@ class Account {
         }
     }
     var name: String = ""
-    var transactions: [Float] = []
+    var transactions: [Transactions] = []
     
     init(amount: Float, name: String) {
         self.amount = amount
@@ -18,13 +23,14 @@ class Account {
     }
     
     @discardableResult
-    func addTransaction(value: Float) -> Float {
-        if (amount - value) < 0{
+    func addTransaction( transaction: Transactions) -> Float {
+        if (amount - transaction.value) < 0{
             return 0
         }
         
-        amount -= value
-        transactions.append(value)
+        amount -= transaction.value
+        transactions.append(transaction)
+        
         return amount
     }
 }
@@ -57,12 +63,13 @@ me.account = account
 
 print(me.account!)
 
-account.addTransaction(value: 20)
-me.account?.addTransaction(value: 20)
+me.account?.addTransaction(
+    transaction: Transactions(value: 20, name: "Cafe con amigos"))
+me.account?.addTransaction(
+    transaction: Transactions(value: 100, name: "Juego PS4"))
+me.account?.addTransaction(
+    transaction: Transactions(value: 3400, name: "MacbookPro"))
+
 
 print(me.account!.amount)
 print(me.fullName)
-
-me.fullName = "Imery Edward"
-print(me.fullName)
-print(me.name)
