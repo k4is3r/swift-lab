@@ -1,5 +1,10 @@
 import Foundation
 
+enum AccountExceptions : Error{
+    case invalidTransaction
+    case amotunExeded
+}
+
 extension Date {
     init(year:Int, month:Int, day:Int){
         let calendar =  Calendar(identifier: .gregorian)
@@ -116,11 +121,11 @@ class Account {
     }
     
     @discardableResult
-    func addTransaction( transaction: TransactionType) -> Transaction? {
+    func addTransaction( transaction: TransactionType) throws -> Transaction? {
         switch transaction {
         case .debit(let value, let name, let category, let date):
             if (amount - value) < 0{
-                return nil
+                throw AccountExceptions.amotunExeded
             }
             let debit = Debit(value: value, name: name, category: category, date: date)
             debit.delegate = self
@@ -202,7 +207,7 @@ me.account = account
 
 print(me.account!)
 
-me.account?.addTransaction(
+try me.account?.addTransaction(
     transaction: .debit(
         value: 20,
         name: "Cafe con amigos",
@@ -211,16 +216,20 @@ me.account?.addTransaction(
     )
 )
 
-me.account?.addTransaction(
-    transaction: .debit(
-        value: 100,
-        name: "Juego PS4",
-        category:.entretaining,
-        date: Date(year: 2019, month: 11, day: 13)
+do {
+    try me.account?.addTransaction(
+        transaction: .debit(
+            value: 1_000_000,
+            name: "Juego PS4",
+            category:.entretaining,
+            date: Date(year: 2019, month: 11, day: 13)
+        )
     )
-)
+}catch {
+    print("Error in Ps4", error)
+}
 
-me.account?.addTransaction(
+try me.account?.addTransaction(
     transaction: .debit(
         value: 3400,
         name: "MacbookPro",
@@ -229,7 +238,7 @@ me.account?.addTransaction(
     )
 )
 
-me.account?.addTransaction(
+try me.account?.addTransaction(
     transaction: .gain(
         value: 1200,
         name: "Rembolso compra",
@@ -237,7 +246,7 @@ me.account?.addTransaction(
     )
 )
 
-me.account?.addTransaction(
+try me.account?.addTransaction(
     transaction: .gain(
         value: 1200,
         name: "Salario",
@@ -245,7 +254,7 @@ me.account?.addTransaction(
     )
 )
 
-var salary = me.account?.addTransaction(
+var salary = try me.account?.addTransaction(
     transaction:.gain(
         value: 1200,
         name: "Salario",
