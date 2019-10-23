@@ -1,15 +1,21 @@
 import Foundation
 
+protocol InvalidateTransaction {
+    func invalidateTransaction(transaction: Transaction)
+}
+
 protocol Transaction {
     var value: Float { get }
     var name: String { get }
     var isValid: Bool { get set }
-    
+    var delegate: InvalidateTransaction? {get set}
 }
 
 extension Transaction {
     mutating func invalidateTransaction(){
         isValid = false
+
+        delegate?.invalidateTransaction(transaction: self)
     }
 
 }
@@ -29,6 +35,7 @@ enum TransactionType {
 }
 
 class Debit: TransactionDebit{
+    var delegate: InvalidateTransaction?
     var value : Float
     var name: String
     var category: DebitCategories
@@ -42,6 +49,7 @@ class Debit: TransactionDebit{
 }
 
 class Gain: Transaction{
+    var delegate: InvalidateTransaction?
     var value: Float
     var name: String
     var isValid : Bool = true
@@ -79,12 +87,14 @@ class Account {
                 return nil
             }
             let debit = Debit(value: value, name: name, category: category)
+            debit.delegate = self
             amount -= debit.value
             transactions.append(debit)
             debits.append(debit)
             return debit
         case .gain(let value, let name):
             let gain = Gain(value:value, name:name)
+            gain.delegate = self
             amount += gain.value
             transactions.append(gain)
             gains.append(gain)
@@ -110,6 +120,16 @@ class Account {
     }
 }
 
+extension Account: InvalidateTransaction {
+    func invalidateTransaction(transaction: Transaction) {
+        if transaction is Debit{
+            amount += transaction.value
+        }
+        if transaction is Gain{
+            amount -= transaction.value
+        }
+    }
+}
 class Person{
     var name: String
     var lastName: String
@@ -169,6 +189,21 @@ me.account?.addTransaction(
     )
 )
 
+me.account?.addTransaction(
+    transaction: .gain(
+        value: 1200,
+        name: "Salario"
+    )
+)
+
+var salary = me.account?.addTransaction(
+    transaction:.gain(
+        value: 1200,
+        name: "Salario"
+    )
+)
+
+salary?.invalidateTransaction()
 
 print(me.account!.amount)
 print(me.fullName)
@@ -181,3 +216,8 @@ for transaction in transactions ?? []{
     )
 }
 
+for gain in me.account?.gains ?? [] {
+    print(gain.name, gain.isValid, gain.value)
+}
+
+print(me.account?.amount ?? 0)
