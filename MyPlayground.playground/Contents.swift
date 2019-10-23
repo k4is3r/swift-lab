@@ -1,36 +1,55 @@
 import Foundation
 
-enum DebitCategories: String{
+protocol Transaction {
+    var value: Float { get }
+    var name: String { get }
+    var isValid: Bool { get set }
+    
+}
+
+extension Transaction {
+    mutating func invalidateTransaction(){
+        isValid = false
+    }
+
+}
+protocol TransactionDebit: Transaction {
+    var category: DebitCategories { get }
+}
+
+enum DebitCategories: Int{
     case healt
     case food, rent, tax
-    case transportation, entretaining
+    case transportation, entretaining = 10
 }
 
 enum TransactionType {
-    case debit(_ value: Debit)
-    case gain(_ value: Gain)
+    case debit(value: Float, name: String, category: DebitCategories)
+    case gain(value: Float, name: String)
 }
 
-class Transactions {
-    var value: Float
+class Debit: TransactionDebit{
+    var value : Float
     var name: String
-    
-    init(value: Float, name: String) {
+    var category: DebitCategories
+    var isValid: Bool = true
+    init(value: Float, name: String, category:DebitCategories) {
+        self.category = category
         self.value = value
         self.name = name
     }
-}
-
-class Debit: Transactions{
-    var category: DebitCategories
     
-    init(value: Float, name: String, category:DebitCategories) {
-        self.category = category
-        super.init(value: value, name: name)
-    }
 }
 
-class Gain: Transactions{
+class Gain: Transaction{
+    var value: Float
+    var name: String
+    var isValid : Bool = true
+    
+    init(value: Float, name: String){
+        self.value = value
+        self.name = name
+    }
     
 }
 
@@ -44,7 +63,7 @@ class Account {
         }
     }
     var name: String = ""
-    var transactions: [Transactions] = []
+    var transactions: [Transaction] = []
     var debits: [Debit] = []
     var gains: [Gain] = []
     init(amount: Float, name: String) {
@@ -53,21 +72,25 @@ class Account {
     }
     
     @discardableResult
-    func addTransaction( transaction: TransactionType) -> Float {
+    func addTransaction( transaction: TransactionType) -> Transaction? {
         switch transaction {
-        case .debit(let debit):
-            if (amount - debit.value) < 0{
-                return 0
+        case .debit(let value, let name, let category):
+            if (amount - value) < 0{
+                return nil
             }
+            let debit = Debit(value: value, name: name, category: category)
             amount -= debit.value
             transactions.append(debit)
             debits.append(debit)
-        case .gain(let gain):
+            return debit
+        case .gain(let value, let name):
+            let gain = Gain(value:value, name:name)
             amount += gain.value
             transactions.append(gain)
+            gains.append(gain)
+            return gain
         }
         
-        return amount
     }
     /*
     func debits() -> [Transactions]{
@@ -77,7 +100,7 @@ class Account {
         return transactions.filter({$0 is Gain})
     }
     */
-    func transactionsFor(category: DebitCategories) -> [Transactions] {
+    func transactionsFor(category: DebitCategories) -> [Transaction] {
         return transactions.filter({ (transaction) -> Bool in
             guard let transaction = transaction as? Debit else{
                 return false
@@ -116,28 +139,34 @@ me.account = account
 print(me.account!)
 
 me.account?.addTransaction(
-    transaction: .debit(Debit(value: 20,
-                              name: "Cafe con amigos",
-                              category:DebitCategories.food
-    ))
+    transaction: .debit(
+        value: 20,
+        name: "Cafe con amigos",
+        category:DebitCategories.food
+    )
 )
 
 me.account?.addTransaction(
-    transaction: .debit(Debit(value: 100,
-                              name: "Juego PS4",
-                              category:.entretaining
-    ))
+    transaction: .debit(
+        value: 100,
+        name: "Juego PS4",
+        category:.entretaining
+    )
 )
 
 me.account?.addTransaction(
-    transaction: .debit(Debit(value: 3400,
-                              name: "MacbookPro",
-                              category:.entretaining
-    ))
+    transaction: .debit(
+        value: 3400,
+        name: "MacbookPro",
+        category:.entretaining
+    )
 )
 
 me.account?.addTransaction(
-    transaction: .gain(Gain(value: 1200,name: "Rembolso compra"))
+    transaction: .gain(
+        value: 1200,
+        name: "Rembolso compra"
+    )
 )
 
 
@@ -145,8 +174,6 @@ print(me.account!.amount)
 print(me.fullName)
 let transactions = me.account?.transactionsFor(category: .entretaining) as? [Debit]
 for transaction in transactions ?? []{
-    let type = transaction.category.rawValue
-    print(type.capitalized)
      print(
         transaction.name,
         transaction.value,
