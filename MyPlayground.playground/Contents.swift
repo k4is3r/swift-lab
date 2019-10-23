@@ -1,6 +1,6 @@
 import Foundation
 
-enum DebitCategories{
+enum DebitCategories: String{
     case healt
     case food, rent, tax
     case transportation, entretaining
@@ -142,6 +142,12 @@ print(me.account!.amount)
 print(me.fullName)
 let transactions = me.account?.transactionsFor(category: .entretaining) as? [Debit]
 for transaction in transactions ?? []{
-     print(transaction.name, transaction.value, transaction.category)
+    let type = transaction.category.rawValue
+    print(type.capitalized)
+     print(
+        transaction.name,
+        transaction.value,
+        transaction.category.rawValue
+    )
 }
 
