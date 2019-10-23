@@ -71,6 +71,15 @@ class Account {
     func gains() -> [Transactions]{
         return transactions.filter({$0 is Gain})
     }
+    
+    func transactionsFor(category: DebitCategories) -> [Transactions] {
+        return transactions.filter({ (transaction) -> Bool in
+            guard let transaction = transaction as? Debit else{
+                return false
+            }
+            return transaction.category == category
+        })
+    }
 }
 
 class Person{
@@ -131,3 +140,8 @@ me.account?.addTransaction(
 
 print(me.account!.amount)
 print(me.fullName)
+let transactions = me.account?.transactionsFor(category: .entretaining) as? [Debit]
+for transaction in transactions ?? []{
+     print(transaction.name, transaction.value, transaction.category)
+}
+
